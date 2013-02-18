@@ -9,7 +9,7 @@ fi
 cd build-couchdb
   git submodule init
   git submodule update
-  rake git="https://git-wip-us.apache.org/repos/asf/couchdb.git tags/1.2.1" install="/Users/jan/build"
+  rake git="https://git-wip-us.apache.org/repos/asf/couchdb.git tags/1.2.1" install="$HOME/build"
 cd ..
 
 if [ ! -d couchdbx-app ]; then
