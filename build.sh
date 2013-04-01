@@ -12,7 +12,7 @@ cd build-couchdb
   rake git="https://git-wip-us.apache.org/repos/asf/couchdb.git 48879873f5316c6ef1dcc6de91ea2f5b2721efb0" install="/Users/jan/build"
 cd ..
 
-if [ ! -d couchdbx-app ]; then
+if [ ! -d couchdb-mac-app ]; then
   git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
 fi
 
