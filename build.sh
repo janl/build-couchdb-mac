@@ -148,12 +148,15 @@ rm -rf $TO_PRUNE
 # build mac app
 cd -
 
+COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
+
 if [ ! -d couchdb-mac-app ]; then
   git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
 fi
 
 cd couchdb-mac-app
   git pull --rebase
+  perl -pi.bak -e 's/<string>VERSION</string>/$COUCHDB_VERSION/' couchdb-mac-app/Couchbase\ Server/Apache\ CouchDB-Info.plist
   xcodebuild
 cd ..
 
