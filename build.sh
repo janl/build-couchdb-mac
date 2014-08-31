@@ -5,6 +5,8 @@ BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 
+COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
+
 SOURCES="/usr/local/lib \
     /usr/local/bin \
     /usr/local/etc \
@@ -26,7 +28,7 @@ cp /usr/local/opt/icu4c/lib/libicuuc.53.dylib \
 cd $BUILDDIR
 
 perl -pi.bak -e 's/\/usr\/local\///g' bin/couchdb etc/couchdb/default.ini
-perl -pi.bak2 -e 's/Cellar\/couchdb\/1.6.0_1\///g' bin/couchdb etc/couchdb/default.ini
+perl -pi.bak2 -e 's/Cellar\/couchdb\/[^/]*\///g' bin/couchdb etc/couchdb/default.ini
 perl -pi.bak3 -e 's/opt\/erlang\///g' bin/couchdb
 perl -pi.bak -e 's/\/usr\/local\/Cellar\/erlang\/17\.1_1/`pwd`/' bin/erl
 
@@ -46,16 +48,16 @@ adjust_name() {
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
 adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicui18n.53.dylib 
 adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicuuc.53.dylib
 
 # adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
 
 # adjust crypto.so
 adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.4/priv/lib/crypto.so
@@ -147,8 +149,6 @@ rm -rf $TO_PRUNE
 
 # build mac app
 cd -
-
-COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
 
 if [ ! -d couchdb-mac-app ]; then
   git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
