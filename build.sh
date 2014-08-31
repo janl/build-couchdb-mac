@@ -28,7 +28,7 @@ cp /usr/local/opt/icu4c/lib/libicuuc.53.dylib \
 cd $BUILDDIR
 
 perl -pi.bak -e 's/\/usr\/local\///g' bin/couchdb etc/couchdb/default.ini
-perl -pi.bak2 -e 's/Cellar\/couchdb\/[^/]*\///g' bin/couchdb etc/couchdb/default.ini
+perl -pi.bak2 -e 's/Cellar\/couchdb\/[^\/]*\///g' bin/couchdb etc/couchdb/default.ini
 perl -pi.bak3 -e 's/opt\/erlang\///g' bin/couchdb
 perl -pi.bak -e 's/\/usr\/local\/Cellar\/erlang\/17\.1_1/`pwd`/' bin/erl
 
