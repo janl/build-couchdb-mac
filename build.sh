@@ -1,30 +1,149 @@
 #!/bin/sh -ex
 
-# cleanup
-# Run build-couchdb to do a fully automated build of the recent CouchDB 
+# clean &  create builddir
+BUILDDIR=/tmp/couchdbx-core
+rm -rf $BUILDDIR
+mkdir -p $BUILDDIR
 
-COUCHDB_VERSION=1.4.0
+SOURCES="/usr/local/lib \
+    /usr/local/bin \
+    /usr/local/etc \
+    /usr/local/var \
+    /usr/local/share"
 
-if [ ! -d build-couchdb ]; then
-  git clone git://github.com/iriscouch/build-couchdb
-fi
-cd build-couchdb
-  git submodule init
-  git submodule update
-  rake \
-    git="https://git-wip-us.apache.org/repos/asf/couchdb.git $COUCHDB_VERSION" \
-    install="/Users/jan/build" \
-    otp_keep=asn1
-cd ..
+cp -r $SOURCES $BUILDDIR
 
-if [ ! -d couchdb-mac-app ]; then
-  git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
-fi
+# copy icu & ssl libs to safety
+cp /usr/local/opt/icu4c/lib/libicuuc.53.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.53.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.53.1.dylib \
+   /usr/local/opt/icu4c/lib/libicui18n.53.dylib \
+   /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib \
+     $BUILDDIR/lib/
 
-cd couchdb-mac-app
-  xcodebuild
-cd ..
 
-cp couchdb-mac-app/build/Release/Apache-CouchDB-*.zip* .
+# replace PATHs
+cd $BUILDDIR
 
-echo "All Done"
+perl -pi.bak -e 's/\/usr\/local\///g' bin/couchdb etc/couchdb/default.ini
+perl -pi.bak2 -e 's/Cellar\/couchdb\/1.6.0_1\///g' bin/couchdb etc/couchdb/default.ini
+perl -pi.bak3 -e 's/opt\/erlang\///g' bin/couchdb
+perl -pi.bak -e 's/\/usr\/local\/Cellar\/erlang\/17\.1_1/`pwd`/' bin/erl
+
+cat <<EOF >> etc/couchdb/local.ini
+[log]
+file = var/log/couch.log
+EOF
+
+# util fun
+adjust_name() {
+    FROM=$1;
+    TO=$2
+    TARGET=$3
+    chmod +w $TARGET
+    install_name_tool -change $FROM $TO $TARGET
+    chmod -w $TARGET
+}
+
+# adjust couch_icu_driver linking
+adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_icu_driver.so
+adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicui18n.53.dylib 
+adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicuuc.53.dylib
+
+# adjust couch_ejson_compare linking
+adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-1.6.0/priv/lib/couch_ejson_compare.so
+
+# adjust crypto.so
+adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.4/priv/lib/crypto.so
+
+
+# adjust couchjs
+adjust_name /usr/local/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
+
+# adjust libmozjs & deps
+adjust_name /usr/local/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
+
+adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
+adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+
+
+
+# trim package, lol
+
+TO_PRUNE=" \
+  share/doc/ \
+  share/locale/ \
+  share/info/ \
+  share/man/ \
+  lib/libwx_* \
+  lib/libjpeg* \
+  lib/libpng* \
+  lib/libtiff* \
+  lib/libicudata.dylib \
+  lib/libicudata.53.dylib \
+  lib/libmozjs185-1.0.a \
+  lib/libmozjs185.1.0.0.dylib \
+  lib/libmozjs185.dylib \
+  lib/erlang/man \
+  lib/erlang/lib/appmon-*/ \
+  lib/erlang/lib/common_test-*/ \
+  lib/erlang/lib/cosEvent-*/ \
+  lib/erlang/lib/cosEventDomain-*/ \
+  lib/erlang/lib/cosFileTransfer-*/ \
+  lib/erlang/lib/cosNotification-*/ \
+  lib/erlang/lib/cosProperty-*/ \
+  lib/erlang/lib/cosTime-*/ \
+  lib/erlang/lib/cosTransactions-*/ \
+  lib/erlang/lib/debugger-*/ \
+  lib/erlang/lib/dialyzer-*/ \
+  lib/erlang/lib/diameter-*/ \
+  lib/erlang/lib/docbuilder-*/ \
+  lib/erlang/lib/edoc-*/ \
+  lib/erlang/lib/erl_docgen-*/ \
+  lib/erlang/lib/erl_interface-*/ \
+  lib/erlang/lib/erts-*/ \
+  lib/erlang/lib/et-*/ \
+  lib/erlang/lib/eunit-*/ \
+  lib/erlang/lib/gs-*/ \
+  lib/erlang/lib/hipe-*/ \
+  lib/erlang/lib/ic-*/ \
+  lib/erlang/lib/inviso-*/ \
+  lib/erlang/lib/jinterface-*/ \
+  lib/erlang/lib/megaco-*/ \
+  lib/erlang/lib/mnesia-*/ \
+  lib/erlang/lib/observer-*/ \
+  lib/erlang/lib/odbc-*/ \
+  lib/erlang/lib/orber-*/ \
+  lib/erlang/lib/otp_mibs-*/ \
+  lib/erlang/lib/parsetools-*/ \
+  lib/erlang/lib/percept-*/ \
+  lib/erlang/lib/pman-*/ \
+  lib/erlang/lib/reltool-*/ \
+  lib/erlang/lib/runtime_tools-*/ \
+  lib/erlang/lib/snmp-*/ \
+  lib/erlang/lib/ssh-*/ \
+  lib/erlang/lib/test_server-*/ \
+  lib/erlang/lib/toolbar-*/ \
+  lib/erlang/lib/tools-*/ \
+  lib/erlang/lib/tv-*/ \
+  lib/erlang/lib/typer-*/ \
+  lib/erlang/lib/webtool-*/ \
+  lib/erlang/lib/wx-*/ \
+  lib/erlang/lib/*/src \
+  bin/wx* \
+  bin/js \
+  bin/*tiff* \
+  bin/*png* \
+  bin/*jpeg* \
+"
+
+rm -rf $TO_PRUNE
+
+
+# adjust all paths in ini // take from old couch.ini
