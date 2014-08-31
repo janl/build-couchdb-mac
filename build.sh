@@ -145,9 +145,8 @@ TO_PRUNE=" \
 
 rm -rf $TO_PRUNE
 
-# adjust all paths in ini // take from old couch.ini
-
 # build mac app
+cd -
 
 if [ ! -d couchdb-mac-app ]; then
   git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
