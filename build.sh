@@ -4,8 +4,9 @@
 BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
+rm -rf ./couchdb-mac-app
 
-COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
+COUCHDB_VERSION=`couchdb -V | head -1 | egrep -o '([0-9.]+)$'`
 
 SOURCES="/usr/local/lib \
     /usr/local/bin \
@@ -79,7 +80,13 @@ adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib 
 # trim package, lol
 
 TO_PRUNE=" \
+  share/aclocal* \
+  share/autoconf* \
+  share/automake* \
+  share/bakefile/ \
   share/doc/ \
+  share/emacs/ \
+  share/libtool/ \
   share/locale/ \
   share/info/ \
   share/man/ \
@@ -155,7 +162,11 @@ if [ ! -d couchdb-mac-app ]; then
 fi
 
 cd couchdb-mac-app
-  git pull --rebase
+  git clean -fdx
+  git reset --hard
+  git pull --rebase --ff-only
+  mkdir -p tmp/
+  cp -r $BUILDDIR ./tmp/
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" Couchbase\ Server/Apache\ CouchDB-Info.plist
   xcodebuild
 cd ..
