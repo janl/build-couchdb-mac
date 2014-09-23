@@ -80,7 +80,13 @@ adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib 
 # trim package, lol
 
 TO_PRUNE=" \
+  share/aclocal* \
+  share/autoconf* \
+  share/automake* \
+  share/bakefile/ \
   share/doc/ \
+  share/emacs/ \
+  share/libtool/ \
   share/locale/ \
   share/info/ \
   share/man/ \
