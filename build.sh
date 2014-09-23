@@ -5,7 +5,7 @@ BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR
 mkdir -p $BUILDDIR
 
-COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
+COUCHDB_VERSION=`couchdb -V | head -1 | egrep -o '([0-9.]+)$'`
 
 SOURCES="/usr/local/lib \
     /usr/local/bin \
