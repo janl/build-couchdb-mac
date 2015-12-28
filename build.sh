@@ -21,9 +21,9 @@ cp /usr/local/opt/icu4c/lib/libicuuc.56.dylib \
    /usr/local/opt/icu4c/lib/libicudata.56.1.dylib \
    /usr/local/opt/icu4c/lib/libicui18n.56.dylib \
    /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib \
-   /usr/local/opt/libplds4.dylib \
-   /usr/local/opt/libplc4.dylib \
-   /usr/local/opt/libnspr4.dylib \
+   /usr/local/opt/nspr/lib/libplds4.dylib \
+   /usr/local/opt/nspr/lib/libplc4.dylib \
+   /usr/local/opt/nspr/lib/libnspr4.dylib \
      $BUILDDIR/lib/
 
 
