@@ -2,7 +2,7 @@
 
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
-rm -rf $BUILDDIR
+rm -rf $BUILDDIR couchdb-mac-app
 mkdir -p $BUILDDIR
 
 COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
@@ -153,12 +153,9 @@ rm -rf $TO_PRUNE
 # build mac app
 cd -
 
-if [ ! -d couchdb-mac-app ]; then
-  git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
-fi
+git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
 
 cd couchdb-mac-app
-  git pull --rebase
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" Couchbase\ Server/Apache\ CouchDB-Info.plist
   xcodebuild clean
   xcodebuild
