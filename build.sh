@@ -67,9 +67,9 @@ adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0
 adjust_name /usr/local/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
 
 # adjust libmozjs & deps
-adjust_name /usr/local/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
-adjust_name /usr/local/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
-adjust_name /usr/local/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
 
 adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
 adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
