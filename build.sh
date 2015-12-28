@@ -16,10 +16,10 @@ SOURCES="/usr/local/lib \
 cp -r $SOURCES $BUILDDIR
 
 # copy icu & ssl libs to safety
-cp /usr/local/opt/icu4c/lib/libicuuc.53.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.53.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.53.1.dylib \
-   /usr/local/opt/icu4c/lib/libicui18n.53.dylib \
+cp /usr/local/opt/icu4c/lib/libicuuc.56.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.56.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.56.1.dylib \
+   /usr/local/opt/icu4c/lib/libicui18n.56.dylib \
    /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib \
      $BUILDDIR/lib/
 
@@ -48,16 +48,16 @@ adjust_name() {
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicui18n.53.dylib 
-adjust_name @loader_path/libicudata.53.dylib @loader_path/libicudata.53.1.dylib lib/libicuuc.53.dylib
+adjust_name /usr/local/opt/icu4c/lib/libicudata.56.1.dylib lib/libicudata.56.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.56.dylib lib/libicuuc.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.56.dylib lib/libicui18n.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name @loader_path/libicudata.56.dylib @loader_path/libicudata.56.1.dylib lib/libicui18n.56.dylib 
+adjust_name @loader_path/libicudata.56.dylib @loader_path/libicudata.56.1.dylib lib/libicuuc.56.dylib
 
 # adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.53.1.dylib lib/libicudata.53.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.53.dylib lib/libicuuc.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.53.dylib lib/libicui18n.53.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.56.1.dylib lib/libicudata.56.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.56.dylib lib/libicuuc.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.56.dylib lib/libicui18n.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
 
 # adjust crypto.so
 adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.4/priv/lib/crypto.so
@@ -88,7 +88,7 @@ TO_PRUNE=" \
   lib/libpng* \
   lib/libtiff* \
   lib/libicudata.dylib \
-  lib/libicudata.53.dylib \
+  lib/libicudata.56.dylib \
   lib/libmozjs185-1.0.a \
   lib/libmozjs185.1.0.0.dylib \
   lib/libmozjs185.dylib \
