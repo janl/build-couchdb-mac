@@ -160,6 +160,7 @@ fi
 cd couchdb-mac-app
   git pull --rebase
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" Couchbase\ Server/Apache\ CouchDB-Info.plist
+  xcodebuild clean
   xcodebuild
 cd ..
 
