@@ -1,3 +1,15 @@
 language: objective-c
-install: true # skips installation
+install: true
 script: ./build.sh
+deploy:
+  provider: s3
+  skip_cleanup: true
+  access_key_id: AKIAJI757GKEMBRQPC4A
+  secret_access_key:
+    secure: QzBJcbQlx6Jsfsmcpa3Trxdzo1puMbZZ5iefgS6a3t09do2lUxHoY41QdntX8S2SkjzRH1IhLQd3F1+mRVpD8ai9zLpjGoEFckylFQuVtlFC96R7RXgNNAFWRDHVibh1VsNURTycYUo2XfJ3/UuuN8gBj5ynQb2IJfS7f+hzG3c=
+  bucket: couchdb-ci
+  local-dir: build
+  upload-dir: mac
+  acl: ''
+  on:
+    repo: janl/build-couchdb-mac

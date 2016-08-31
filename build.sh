@@ -180,4 +180,6 @@ cd couchdb-mac-app
   xcodebuild
 cd ..
 
-cp couchdb-mac-app/build/Release/Apache-*.zip* .
+rm -rf build
+mkdir -p build
+cp couchdb-mac-app/build/Release/Apache-*.zip* build/
