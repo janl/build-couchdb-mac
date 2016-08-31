@@ -8,8 +8,9 @@ deploy:
   secret_access_key:
     secure: QzBJcbQlx6Jsfsmcpa3Trxdzo1puMbZZ5iefgS6a3t09do2lUxHoY41QdntX8S2SkjzRH1IhLQd3F1+mRVpD8ai9zLpjGoEFckylFQuVtlFC96R7RXgNNAFWRDHVibh1VsNURTycYUo2XfJ3/UuuN8gBj5ynQb2IJfS7f+hzG3c=
   bucket: couchdb-ci
-  local_dir: build
-  upload_dir: mac
+  local-dir: build
+  upload-dir: mac
   region: eu-west-1
+  acl: public_read
   on:
     repo: janl/build-couchdb-mac
