@@ -21,6 +21,7 @@ cd apache-couchdb-*
 make
 make release
 cp -r rel/couchdb/ $BUILDDIR
+cd ..
 
 COUCHDB_VERSION=`ls apache-couchdb-* | grep -Eo '(\d\.\d\.\d)'`
 
