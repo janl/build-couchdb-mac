@@ -23,7 +23,7 @@ make release
 cp -r rel/couchdb/ $BUILDDIR
 cd ..
 
-COUCHDB_VERSION=`ls apache-couchdb-* | grep -Eo '(\d\.\d\.\d)'`
+COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d\.\d\.\d)'`
 
 # SOURCES="/usr/local/lib \
 #     /usr/local/bin \
@@ -47,16 +47,11 @@ cp /usr/local/opt/icu4c/lib/libicuuc.57.dylib \
 
 # replace PATHs
 cd $BUILDDIR
-
-perl -pi.bak -e 's/\/usr\/local\///g' bin/couchdb etc/couchdb/default.ini
-perl -pi.bak2 -e 's/Cellar\/couchdb\/[^\/]*\///g' bin/couchdb etc/couchdb/default.ini
-perl -pi.bak3 -e 's/opt\/erlang\///g' bin/couchdb
-perl -pi.bak -e 's/\/usr\/local\/Cellar\/erlang\/18\.2\.1/`pwd`/' bin/erl
-
-cat <<EOF >> etc/couchdb/local.ini
-[log]
-file = var/log/couch.log
-EOF
+#
+# cat <<EOF >> etc/couchdb/local.ini
+# [log]
+# file = var/log/couch.log
+# EOF
 
 # util fun
 adjust_name() {
