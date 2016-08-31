@@ -12,7 +12,7 @@ brew link -f icu4c
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-wget https://couchdb-ci.s3-eu-west-1.amazonaws.com/release-candidate/apache-couchdb-2.0.0-487df37.tar.gz
+wget https://couchdb-ci.s3-eu-west-1.amazonaws.com/release-candidate/apache-couchdb-2.0.0-cedb69c.tar.gz
 tar xzf apache-couchdb-*
 
 # build couchdb
@@ -20,7 +20,7 @@ cd apache-couchdb-*
 ./configure
 make
 make release
-cp -r rel/couchdb $BUILDDIR
+cp -r rel/couchdb/ $BUILDDIR
 
 COUCHDB_VERSION=`ls apache-couchdb-* | grep -Eo '(\d\.\d\.\d)'`
 
