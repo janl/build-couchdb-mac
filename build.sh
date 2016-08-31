@@ -1,19 +1,38 @@
-#!/bin/sh -ex
+#!/bin/sh -x
 
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR couchdb-mac-app
 mkdir -p $BUILDDIR
 
-COUCHDB_VERSION=`couchdb -V | grep -Eo '(\d\.\d\.\d)'`
+# prepare build deps
+brew update
+brew install erlang spidermonkey icu4c
+brew link icu4c
 
-SOURCES="/usr/local/lib \
-    /usr/local/bin \
-    /usr/local/etc \
-    /usr/local/var \
-    /usr/local/share"
+# get latest couchdb release:
+rm -rf apache-couchdb-*
+wget https://couchdb-ci.s3-eu-west-1.amazonaws.com/release-candidate/apache-couchdb-2.0.0-487df37.tar.gz
+tar xzf apache-couchdb-*
 
-cp -r $SOURCES $BUILDDIR
+# build couchdb
+cd apache-couchdb-*
+./configure
+make
+make release
+cp -r rel/couchdb $BUILDDIR
+
+COUCHDB_VERSION=`ls apache-couchdb-* | grep -Eo '(\d\.\d\.\d)'`
+
+# SOURCES="/usr/local/lib \
+#     /usr/local/bin \
+#     /usr/local/etc \
+#     /usr/local/var \
+#     /usr/local/share"
+#
+# cp -r $SOURCES $BUILDDIR
+
+ls -la /usr/local/opt/icu4c/lib /usr/local/opt/openssl/lib /usr/local/opt/nspr/lib
 
 # copy icu & ssl && nspr libs to safety
 cp /usr/local/opt/icu4c/lib/libicuuc.56.dylib \
