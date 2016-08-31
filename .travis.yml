@@ -10,6 +10,5 @@ deploy:
   bucket: couchdb-ci
   local-dir: build
   upload-dir: mac
-  acl: ''
   on:
     repo: janl/build-couchdb-mac
