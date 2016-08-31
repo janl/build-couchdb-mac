@@ -185,3 +185,5 @@ mkdir -p build
 cp couchdb-mac-app/build/Release/Apache-*.zip* build/
 ls -la
 ls -la build
+
+cd $HOME/janl/build-couchdb-mac
