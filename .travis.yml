@@ -10,5 +10,6 @@ deploy:
   bucket: couchdb-ci
   local-dir: build
   upload-dir: mac
+  region: eu-west-1
   on:
     repo: janl/build-couchdb-mac
