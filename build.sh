@@ -7,8 +7,8 @@ mkdir -p $BUILDDIR
 
 # prepare build deps
 brew update
-brew install erlang spidermonkey icu4c
-brew link icu4c
+brew install erlang spidermonkey icu4c md5sha1sum
+brew link -f icu4c
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
