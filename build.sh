@@ -179,11 +179,10 @@ cd couchdb-mac-app
   xcodebuild
 cd ..
 
-rm -rf build
-mkdir -p build
+DESTDIR=$HOME/build/janl/build-couchdb-mac/build
+rm -rf $DESTDIR
+mkdir -p $DESTDIR
 
-cp couchdb-mac-app/build/Release/Apache-*.zip* build/
-ls -la
-ls -la build
-pwd
+cp couchdb-mac-app/build/Release/Apache-*.zip* $DESTDIR
+
 cd $HOME/build/janl/build-couchdb-mac
