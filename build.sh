@@ -32,13 +32,11 @@ COUCHDB_VERSION=`ls apache-couchdb-* | grep -Eo '(\d\.\d\.\d)'`
 #
 # cp -r $SOURCES $BUILDDIR
 
-ls -la /usr/local/opt/icu4c/lib /usr/local/opt/openssl/lib /usr/local/opt/nspr/lib
-
 # copy icu & ssl && nspr libs to safety
-cp /usr/local/opt/icu4c/lib/libicuuc.56.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.56.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.56.1.dylib \
-   /usr/local/opt/icu4c/lib/libicui18n.56.dylib \
+cp /usr/local/opt/icu4c/lib/libicuuc.57.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.57.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.57.1.dylib \
+   /usr/local/opt/icu4c/lib/libicui18n.57.dylib \
    /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
@@ -70,16 +68,16 @@ adjust_name() {
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.56.1.dylib lib/libicudata.56.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.56.dylib lib/libicuuc.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.56.dylib lib/libicui18n.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name @loader_path/libicudata.56.dylib @loader_path/libicudata.56.1.dylib lib/libicui18n.56.dylib 
-adjust_name @loader_path/libicudata.56.dylib @loader_path/libicudata.56.1.dylib lib/libicuuc.56.dylib
+adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicui18n.57.dylib 
+adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicuuc.57.dylib
 
 # adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.56.1.dylib lib/libicudata.56.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.56.dylib lib/libicuuc.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.56.dylib lib/libicui18n.56.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
 
 # adjust crypto.so
 adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.6.2/priv/lib/crypto.so
@@ -93,9 +91,10 @@ adjust_name /usr/local/opt/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0
 adjust_name /usr/local/opt/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
 adjust_name /usr/local/opt/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
 
-adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
-adjust_name /usr/local/Cellar/nspr/4.10.6/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
+adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
 
+ls -la /usr/local/Cellar/nspr/
 
 
 # trim package, lol
@@ -110,7 +109,7 @@ TO_PRUNE=" \
   lib/libpng* \
   lib/libtiff* \
   lib/libicudata.dylib \
-  lib/libicudata.56.dylib \
+  lib/libicudata.57.dylib \
   lib/libmozjs185-1.0.a \
   lib/libmozjs185.1.0.0.dylib \
   lib/libmozjs185.dylib \
@@ -182,4 +181,6 @@ cd ..
 
 rm -rf build
 mkdir -p build
+ls -la
+ls -la build
 cp couchdb-mac-app/build/Release/Apache-*.zip* build/
