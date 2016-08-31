@@ -64,16 +64,16 @@ adjust_name() {
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couch-*/priv/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couch-*/priv/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couch-*/priv/couch_icu_driver.so
 adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicui18n.57.dylib 
 adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicuuc.57.dylib
 
 # adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couchdb/erlang/lib/couch-$COUCHDB_VERSION/priv/lib/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couch-*/priv/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couch-*/priv/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 # adjust crypto.so
 adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.6.2/priv/lib/crypto.so
