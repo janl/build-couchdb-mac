@@ -15,6 +15,7 @@ rm -rf apache-couchdb-*
 wget https://couchdb-ci.s3-eu-west-1.amazonaws.com/release-candidate/apache-couchdb-2.0.0.tar.gz
 tar xzf apache-couchdb-*
 
+
 # build couchdb
 cd apache-couchdb-*
 ./configure
