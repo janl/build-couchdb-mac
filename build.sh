@@ -76,7 +76,7 @@ adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib
 adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 # adjust crypto.so
-adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-3.6.2/priv/lib/crypto.so
+adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/erlang/lib/crypto-7/priv/lib/crypto.so
 
 
 # adjust couchjs
