@@ -42,7 +42,7 @@ cp /usr/local/opt/icu4c/lib/libicuuc.57.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
    /usr/local/opt/nspr/lib/libnspr4.dylib \
-   /usr/local/lib/libmozjs185.1.0.dylib \
+   /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib \
      $BUILDDIR/lib/
 
 
@@ -81,7 +81,7 @@ adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0
 
 
 # adjust couchjs
-adjust_name /usr/local/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
+adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
 
 # adjust libmozjs & deps
 adjust_name /usr/local/opt/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
