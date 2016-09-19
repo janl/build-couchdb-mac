@@ -88,8 +88,8 @@ adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmoz
 adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
 adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
 
-adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
-adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+adjust_name /usr/local/Cellar/nspr/4.11/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
+adjust_name /usr/local/Cellar/nspr/4.11/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
 
 # trim package, lol
 
