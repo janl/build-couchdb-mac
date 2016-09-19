@@ -84,15 +84,12 @@ adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0
 adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
 
 # adjust libmozjs & deps
-adjust_name /usr/local/opt/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
-adjust_name /usr/local/opt/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
-adjust_name /usr/local/opt/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/nspr/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/nspr/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/nspr/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
 
 adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
 adjust_name /usr/local/Cellar/nspr/4.12.1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
-
-ls -la /usr/local/Cellar/nspr/
-
 
 # trim package, lol
 
