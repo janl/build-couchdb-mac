@@ -12,7 +12,8 @@ brew link -f icu4c
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-wget https://dist.apache.org/repos/dist/dev/couchdb/source/2.1.0/rc.1/apache-couchdb-2.1.0-RC1.tar.gz
+wget https://dist.apache.org/repos/dist/release/couchdb/source/2.1.0/apache-couchdb-2.1.0.tar.gz
+mv apache-couchdb-2.1.0-RC1.tar.gz apache-couchdb-2.1.0.tar.gz
 tar xzf apache-couchdb-*
 
 # build couchdb
@@ -23,7 +24,7 @@ make release
 cp -r rel/couchdb/ $BUILDDIR
 cd ..
 
-COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo 'apache-couchdb(.*).tar.gz$'`
+COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
 
 # SOURCES="/usr/local/lib \
 #     /usr/local/bin \
@@ -34,10 +35,10 @@ COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo 'apache-couchdb(.*).
 # cp -r $SOURCES $BUILDDIR
 
 # copy icu & ssl && nspr libs to safety
-cp /usr/local/opt/icu4c/lib/libicuuc.57.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.57.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.57.1.dylib \
-   /usr/local/opt/icu4c/lib/libicui18n.57.dylib \
+cp /usr/local/opt/icu4c/lib/libicuuc.58.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.58.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.58.2.dylib \
+   /usr/local/opt/icu4c/lib/libicui18n.58.dylib \
    /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
@@ -65,20 +66,19 @@ adjust_name() {
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couch-*/priv/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couch-*/priv/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couch-*/priv/couch_icu_driver.so
-adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicui18n.57.dylib 
-adjust_name @loader_path/libicudata.57.dylib @loader_path/libicudata.57.1.dylib lib/libicuuc.57.dylib
+adjust_name /usr/local/opt/icu4c/lib/libicudata.58.2.dylib lib/libicudata.58.2.dylib lib/couch-*/priv/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.58.dylib lib/libicuuc.58.dylib lib/couch-*/priv/couch_icu_driver.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.58.dylib lib/libicui18n.58.dylib lib/couch-*/priv/couch_icu_driver.so
+adjust_name @loader_path/libicudata.58.dylib @loader_path/libicudata.58.2.dylib lib/libicui18n.58.dylib
+adjust_name @loader_path/libicudata.58.dylib @loader_path/libicudata.58.2.dylib lib/libicuuc.58.dylib
 
 # adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.57.1.dylib lib/libicudata.57.1.dylib lib/couch-*/priv/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.57.dylib lib/libicuuc.57.dylib lib/couch-*/priv/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.57.dylib lib/libicui18n.57.dylib lib/couch-*/priv/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicudata.58.2.dylib lib/libicudata.58.2.dylib lib/couch-*/priv/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicuuc.58.dylib lib/libicuuc.58.dylib lib/couch-*/priv/couch_ejson_compare.so
+adjust_name /usr/local/opt/icu4c/lib/libicui18n.58.dylib lib/libicui18n.58.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 # adjust crypto.so
-adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib /tmp/couchdbx-core/lib/crypto-3.7/priv/lib/crypto.so
-
+adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib lib/crypto-3.6.3/priv/lib/crypto.so
 
 # adjust couchjs
 adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
@@ -87,9 +87,16 @@ adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs18
 adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs185.1.0.dylib
 adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs185.1.0.dylib
 adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs185.1.0.dylib
+adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib
 
-adjust_name /usr/local/Cellar/nspr/4.12_1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
-adjust_name /usr/local/Cellar/nspr/4.12_1/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+
+adjust_name /usr/local/Cellar/nspr/4.11/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
+adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libplds4.dylib
+
+adjust_name /usr/local/Cellar/nspr/4.11/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libplc4.dylib
+
+adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libnspr4.dylib
 
 # trim package, lol
 
@@ -103,7 +110,7 @@ TO_PRUNE=" \
   lib/libpng* \
   lib/libtiff* \
   lib/libicudata.dylib \
-  lib/libicudata.57.dylib \
+  lib/libicudata.58.dylib \
   lib/libmozjs185-1.0.a \
   lib/libmozjs185.1.0.0.dylib \
   lib/libmozjs185.dylib \
