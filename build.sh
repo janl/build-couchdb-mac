@@ -78,7 +78,7 @@ adjust_name /usr/local/opt/icu4c/lib/libicuuc.58.dylib lib/libicuuc.58.dylib lib
 adjust_name /usr/local/opt/icu4c/lib/libicui18n.58.dylib lib/libicui18n.58.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 # adjust crypto.so
-adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib lib/crypto-3.6.3/priv/lib/crypto.so
+adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib lib/crypto-3.4.2/priv/lib/crypto.so
 
 # adjust couchjs
 adjust_name /usr/local/opt/spidermonkey/lib/libmozjs185.1.0.dylib lib/libmozjs185.1.0.dylib bin/couchjs
