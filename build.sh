@@ -16,7 +16,7 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-wget https://dist.apache.org/repos/dist/release/couchdb/source/2.1.0/apache-couchdb-2.1.0.tar.gz
+wget https://dist.apache.org/repos/dist/dev/couchdb/source/2.1.1/rc.1/apache-couchdb-2.1.1-RC1.tar.gz
 tar xzf apache-couchdb-*
 
 # build couchdb
