@@ -21,6 +21,7 @@ tar xzf apache-couchdb-*
 
 # build couchdb
 cd apache-couchdb-*
+perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
 ./configure
 make
 make release
