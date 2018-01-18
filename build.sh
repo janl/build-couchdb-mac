@@ -1,4 +1,4 @@
-#!/bin/sh -xe
+#!/bin/sh -x
 
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
@@ -16,19 +16,42 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-wget https://dist.apache.org/repos/dist/dev/couchdb/source/2.1.1/rc.1/apache-couchdb-2.1.1-RC1.tar.gz
+#wget https://dist.apache.org/repos/dist/dev/couchdb/source/2.1.1/rc.2/apache-couchdb-2.1.1-RC2.tar.gz
+wget https://dist.apache.org/repos/dist/dev/couchdb/source/1.7.0/rc.1/apache-couchdb-1.7.0.tar.gz
 tar xzf apache-couchdb-*
+
+COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
 
 # build couchdb
 cd apache-couchdb-*
-perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
-./configure
-make
-make release
-cp -r rel/couchdb/ $BUILDDIR
+
+COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
+
+case $COUCHDB_MAJOR_VERSION in
+    2)
+	echo "building for 2"
+	perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
+	./configure
+	make
+	make release
+	cp -r rel/couchdb/ $BUILDDIR
+	break
+    ;;
+    1)
+	echo "building for 1"
+	./configure --prefix=$BUILDDIR
+	make -j5
+	make install
+	break
+    ;;
+
+    *)
+	echo "unknown CouchDB Version $COUCHDB_VERSION"
+	exit 7
+esac
+
 cd ..
 
-COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
 
 # SOURCES="/usr/local/lib \
 #     /usr/local/bin \
@@ -68,24 +91,50 @@ adjust_name() {
     TARGET=$3
     chmod +w $TARGET
     install_name_tool -change $FROM $TO $TARGET
-    if [ $? ~ne 0 ]; then
+    if [ $? -ne 0 ]; then
       echo "FAIL $TARGET"
-      exit 1
+      #exit 1
     fi
     chmod -w $TARGET
 }
 
 # adjust couch_icu_driver linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+case $COUCHDB_MAJOR_VERSION in
+    2)
+        echo "adjusting for 2"
+	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+
+        # adjust couch_ejson_compare linking
+	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	break
+    ;;
+    1)
+        echo "adjusting for 1"
+	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+
+        # adjust couch_ejson_compare linking
+	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	break
+    ;;
+
+    *)
+        echo "unknown CouchDB Version $COUCHDB_VERSION"
+        exit 7
+esac
+
+
+
 adjust_name @loader_path/libicudata.$ICUUCI18N_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib
 adjust_name @loader_path/libicudata.$ICUUCI18N_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib
 
-# adjust couch_ejson_compare linking
-adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 # adjust crypto.so
 adjust_name /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib lib/libcrypto.1.0.0.dylib lib/crypto-*/priv/lib/crypto.so
