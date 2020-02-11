@@ -16,7 +16,9 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/2.3.1/rc.3/apache-couchdb-3.0.0-RC1.tar.gz
+#curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/2.3.1/rc.3/apache-couchdb-3.0.0-RC1.tar.gz
+curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.0/rc.1/apache-couchdb-3.0.0-RC1.tar.gz
+
 tar xzf apache-couchdb-*
 
 COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
@@ -69,15 +71,14 @@ cd ..
 #
 # cp -r $SOURCES $BUILDDIR
 
-ICUDATA_VERSION=`ls /usr/local/opt/icu4c/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
-ICUUCI18N_VERSION=`ls /usr/local/opt/icu4c/lib/libicuuc.??.dylib | grep -o '\d\d'`
+ICU_VERSION=`ls /usr/local/opt/icu4c/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
 NSPR_VERSION=`ls /usr/local/Cellar/nspr/`
 
 # copy icu & ssl && nspr libs to safety
-cp /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib \
-   /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib \
-   /usr/local/opt/openssl/lib/libcrypto.1.1.dylib \
+cp /usr/local/opt/icu4c/lib/libicuuc.$ICU_VERSION.dylib \
+   /usr/local/opt/icu4c/lib/libicudata.$ICU_VERSION.dylib \
+   /usr/local/opt/icu4c/lib/libicui18n.$ICU_VERSION.dylib \
+   /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
    /usr/local/opt/nspr/lib/libnspr4.dylib \
@@ -101,8 +102,21 @@ adjust_name() {
     chmod +w $TARGET
     install_name_tool -change $FROM $TO $TARGET
     if [ $? -ne 0 ]; then # this does not seem to work for some reason
-	echo "FAIL $TARGET"
-	exit 1
+      echo "FAIL $TARGET"
+      exit 1
+    fi
+    chmod -w $TARGET
+}
+adjust_name_by_tag() {
+    FROM_TAG=$1;
+    TO=$2
+    TARGET=$3
+    chmod +w $TARGET
+    FROM=`otool -L $TARGET | grep $FROM_TAG | awk '{print $1}'`
+    install_name_tool -change $FROM $TO $TARGET
+    if [ $? -ne 0 ]; then # this does not seem to work for some reason
+      echo "FAIL $TARGET"
+      exit 1
     fi
     chmod -w $TARGET
 }
@@ -111,14 +125,14 @@ adjust_name() {
 case $COUCHDB_MAJOR_VERSION in
     [23])
         echo "adjusting for 2/3"
-	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
 
         # adjust couch_ejson_compare linking
-	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_nam_by_tage_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 	break
     ;;
     1)
@@ -141,12 +155,13 @@ esac
 
 
 
-adjust_name @loader_path/libicudata.$ICUUCI18N_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib
-adjust_name @loader_path/libicudata.$ICUUCI18N_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib
+adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicui18n.$ICU_VERSION.dylib
+adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libicui18n.$ICU_VERSION.dylib
+adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicuuc.$ICU_VERSION.dylib
 
 
 # adjust crypto.so
-adjust_name /usr/local/opt/openssl/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
+adjust_name /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
 
 # adjust couchjs
 adjust_name /usr/local/opt/spidermonkey60/lib/libmozjs-60.dylib lib/libmozjs-60.dylib bin/couchjs
@@ -177,8 +192,6 @@ TO_PRUNE=" \
   lib/libjpeg* \
   lib/libpng* \
   lib/libtiff* \
-  lib/libicudata.dylib \
-  lib/libicudata.58.dylib \
   lib/libmozjs185-1.0.a \
   lib/libmozjs185.1.0.0.dylib \
   lib/libmozjs185.dylib \
