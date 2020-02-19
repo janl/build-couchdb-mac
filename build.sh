@@ -5,6 +5,8 @@ BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR couchdb-mac-app
 mkdir -p $BUILDDIR
 
+ENT_PATH=`pwd`
+
 DESTDIR=./build
 rm -rf $DESTDIR
 mkdir -p $DESTDIR
@@ -16,9 +18,7 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-#curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/2.3.1/rc.3/apache-couchdb-3.0.0-RC1.tar.gz
-curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.0/rc.1/apache-couchdb-3.0.0-RC1.tar.gz
-
+curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.0/rc.2/apache-couchdb-3.0.0-RC2.tar.gz
 tar xzf apache-couchdb-*
 
 COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
@@ -27,13 +27,19 @@ COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | 
 cd apache-couchdb-*
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
+ERLANG_PREFIX=/usr/local/opt/couchdbx-erlang
+ICU_PREFIX=/usr/local/opt/couchdbx-icu4c
 
 case $COUCHDB_MAJOR_VERSION in
     3)
   echo "building for 3"
   perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
-  ./configure --spidermonkey-version 60
-  make
+  export PATH=$ERLANG_PREFIX=/usr/local/opt/couchdbx-erlang/bin:$PATH
+  export LDFLAGS="-L$ICU_PREFIX/lib"
+  export CFLAGS="-I$ICU_PREFIX/include"
+  export CPPFLAGS="-I$ICU_PREFIX/include"
+  ./configure --spidermonkey-version 60 --erlang-md5
+  make -j7
   make release
   cp -r rel/couchdb/ $BUILDDIR
   break
@@ -71,13 +77,16 @@ cd ..
 #
 # cp -r $SOURCES $BUILDDIR
 
-ICU_VERSION=`ls /usr/local/opt/icu4c/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
+
+
+
+ICU_VERSION=`ls $ICU_PREFIX/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
 NSPR_VERSION=`ls /usr/local/Cellar/nspr/`
 
 # copy icu & ssl && nspr libs to safety
-cp /usr/local/opt/icu4c/lib/libicuuc.$ICU_VERSION.dylib \
-   /usr/local/opt/icu4c/lib/libicudata.$ICU_VERSION.dylib \
-   /usr/local/opt/icu4c/lib/libicui18n.$ICU_VERSION.dylib \
+cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
+   $ICU_PREFIX/lib/libicudata.$ICU_VERSION.dylib \
+   $ICU_PREFIX/lib/libicui18n.$ICU_VERSION.dylib \
    /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
@@ -107,6 +116,7 @@ adjust_name() {
     fi
     chmod -w $TARGET
 }
+
 adjust_name_by_tag() {
     FROM_TAG=$1;
     TO=$2
@@ -129,22 +139,25 @@ case $COUCHDB_MAJOR_VERSION in
 	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
 	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
 
+	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+
+
         # adjust couch_ejson_compare linking
 	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_nam_by_tage_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name_by_tage_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 	break
     ;;
     1)
         echo "adjusting for 1"
-	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
-	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
-	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+	adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+	adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+	adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
 
         # adjust couch_ejson_compare linking
-	adjust_name /usr/local/opt/icu4c/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
-	adjust_name /usr/local/opt/icu4c/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
-	adjust_name /usr/local/opt/icu4c/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+	adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
 	break
     ;;
 
@@ -171,6 +184,9 @@ adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmoz
 adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-60.dylib
 adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-60.dylib
 adjust_name /usr/local/opt/spidermonkey60/lib/libmozjs-60.dylib lib/libmozjs-60.dylib lib/libmozjs-60.dylib
+adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-60.dylib
+adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-60.dylib
+adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-60.dylib
 
 
 adjust_name /usr/local/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
@@ -195,6 +211,7 @@ TO_PRUNE=" \
   lib/libmozjs185-1.0.a \
   lib/libmozjs185.1.0.0.dylib \
   lib/libmozjs185.dylib \
+  lib/couch-*/priv/couchjs \
   lib/erlang/man \
   lib/erlang/lib/appmon-*/ \
   lib/erlang/lib/common_test-*/ \
@@ -250,15 +267,46 @@ TO_PRUNE=" \
 
 rm -rf $TO_PRUNE
 
+SIGN_BIN=`find . -type f -perm +111 -print`
+SIGN_SO=`find . -name "*.so"`
+SIGN_DYLIB=`find . -name "*.dylib"`
+codesign --verbose --force --deep -o runtime --sign $CODESIGN_IDENTITY \
+  --entitlements $ENT_PATH/entitlements.plist \
+    $SIGN_BIN $SIGN_SO $SIGN_DYLIB
+
 # build mac app
 cd -
-
 git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
 
 cd couchdb-mac-app
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" CouchDB\ Server/Apache\ CouchDB-Info.plist
   xcodebuild clean
-  xcodebuild
+  xcodebuild archive
+  cd build/Release
+  # zip Apache\ CouchDB.app.zip Apache\ CouchDB.app
+  # UPLOAD=`xcrun altool --notarize-app -t osx -f Apache\ CouchDB.app.zip \
+  #   --primary-bundle-id org.apache.couchdbx-jan \
+  #   -u $APPLE_ID_USER \
+  #   -p @keychain:APPLE_ID_PASS \
+  #   --output-format xml`
+  #
+  # echo $UPLOAD
+
+  cd ../..
+  # CDBX_BASE_DIR=`pwd`
+  # CDBX_BUILD_DIR=$CDBX_BASE_DIR/Builds
+  # CDBX_ARCHIVE=$CDBX_BASE_DIR/Apache\ CouchDB.xcarchive
+  # CDBX_APP=$CDBX_BUILD_DIR/Apache\ CouchDB.app
+  # echo "Building App..."
+  # echo "Cleaning up old archive & app..."
+  # # rm -rf $FOCUS_ARCHIVE $FOCUS_APP
+  # echo "Building archive..."
+  # xcodebuild -project $CDBX_BASE_DIR/Apache\ CouchDB.xcodeproj -config Release -scheme Apache\ CouchDB -archivePath "$CDBX_ARCHIVE" archive
+  # echo "Exporting archive..."
+  # xcodebuild -archivePath "$CDBX_ARCHIVE" -exportArchive -exportPath "$CDBX_APP" -exportFormat app
+  # echo "Cleaning up archive..."
+  # # rm -rf $FOCUS_ARCHIVE
+  echo "Done"
 cd ..
 
 cp couchdb-mac-app/build/Release/Apache-*.zip $DESTDIR
