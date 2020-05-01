@@ -1,5 +1,11 @@
 #!/bin/sh -x
 
+
+if [ -z "$CODESIGN_IDENTITY" ]; then
+  exho "No CODESIGN_IDENTITY found. Exiting."
+  exit 1
+fi
+
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR couchdb-mac-app
@@ -18,7 +24,9 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-curl -O https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.0/rc.2/apache-couchdb-3.0.0-RC2.tar.gz
+
+URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.1/rc.2/apache-couchdb-3.0.1-RC2.tar.gz
+curl -O $URL
 tar xzf apache-couchdb-*
 
 COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
@@ -267,21 +275,23 @@ TO_PRUNE=" \
 
 rm -rf $TO_PRUNE
 
+
+# build mac app
+cd -
+git clone git@github.com:janl/couchdb-mac-app.git couchdb-mac-app
+cd -
 SIGN_BIN=`find . -type f -perm +111 -print`
 SIGN_SO=`find . -name "*.so"`
 SIGN_DYLIB=`find . -name "*.dylib"`
 codesign --verbose --force --deep -o runtime --sign $CODESIGN_IDENTITY \
   --entitlements $ENT_PATH/entitlements.plist \
     $SIGN_BIN $SIGN_SO $SIGN_DYLIB
-
-# build mac app
 cd -
-git clone git://github.com/janl/couchdb-mac-app.git couchdb-mac-app
-
 cd couchdb-mac-app
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" CouchDB\ Server/Apache\ CouchDB-Info.plist
-  xcodebuild clean
-  xcodebuild archive
+  open Apache\ CouchDB.xcodeproj
+  # xcodebuild clean
+  # xcodebuild archive
   cd build/Release
   # zip Apache\ CouchDB.app.zip Apache\ CouchDB.app
   # UPLOAD=`xcrun altool --notarize-app -t osx -f Apache\ CouchDB.app.zip \
