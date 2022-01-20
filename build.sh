@@ -2,7 +2,7 @@
 
 
 if [ -z "$CODESIGN_IDENTITY" ]; then
-  exho "No CODESIGN_IDENTITY found. Exiting."
+  echo "No CODESIGN_IDENTITY found. Exiting."
   exit 1
 fi
 
@@ -24,8 +24,9 @@ mkdir -p $DESTDIR
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
+sleep 4
 
-URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.0.1/rc.2/apache-couchdb-3.0.1-RC2.tar.gz
+URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
 curl -O $URL
 tar xzf apache-couchdb-*
 
@@ -36,7 +37,7 @@ cd apache-couchdb-*
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
 ERLANG_PREFIX=/usr/local/opt/couchdbx-erlang
-ICU_PREFIX=/usr/local/opt/couchdbx-icu4c
+ICU_PREFIX=/usr/local/opt/icu4c
 
 case $COUCHDB_MAJOR_VERSION in
     3)
@@ -46,7 +47,7 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 60 --erlang-md5
+  ./configure --spidermonkey-version 86 --erlang-md5
   make -j7
   make release
   cp -r rel/couchdb/ $BUILDDIR
@@ -99,7 +100,7 @@ cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
    /usr/local/opt/nspr/lib/libplds4.dylib \
    /usr/local/opt/nspr/lib/libplc4.dylib \
    /usr/local/opt/nspr/lib/libnspr4.dylib \
-   /usr/local/opt/spidermonkey60/lib/libmozjs-60.dylib \
+   /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib \
      $BUILDDIR/lib/
 
 
@@ -143,16 +144,16 @@ adjust_name_by_tag() {
 case $COUCHDB_MAJOR_VERSION in
     [23])
         echo "adjusting for 2/3"
-	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	# adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	# adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+	# adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
 
 	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 
 
         # adjust couch_ejson_compare linking
 	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_name_by_tage_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
 	break
     ;;
@@ -185,16 +186,16 @@ adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicuuc.$IC
 adjust_name /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
 
 # adjust couchjs
-adjust_name /usr/local/opt/spidermonkey60/lib/libmozjs-60.dylib lib/libmozjs-60.dylib bin/couchjs
+adjust_name /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib lib/libmozjs-86.dylib bin/couchjs
 
 # adjust libmozjs & deps
-adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-60.dylib
-adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-60.dylib
-adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-60.dylib
-adjust_name /usr/local/opt/spidermonkey60/lib/libmozjs-60.dylib lib/libmozjs-60.dylib lib/libmozjs-60.dylib
-adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-60.dylib
-adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-60.dylib
-adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-60.dylib
+adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-86.dylib
+adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-86.dylib
+adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-86.dylib
+adjust_name /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib lib/libmozjs-86.dylib lib/libmozjs-86.dylib
+adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-86.dylib
+adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-86.dylib
+adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-86.dylib
 
 
 adjust_name /usr/local/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
