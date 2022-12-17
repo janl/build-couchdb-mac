@@ -111,7 +111,7 @@ cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
    $PREFIX/opt/nspr/lib/libplds4.dylib \
    $PREFIX/opt/nspr/lib/libplc4.dylib \
    $PREFIX/opt/nspr/lib/libnspr4.dylib \
-   $PREFIX/opt/spidermonkey$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib \
+   $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib \
      $BUILDDIR/lib/
 
 
