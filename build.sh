@@ -6,6 +6,8 @@ if [ -z "$CODESIGN_IDENTITY" ]; then
   exit 1
 fi
 
+SM_VERSION=91
+
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
 rm -rf $BUILDDIR couchdb-mac-app
@@ -22,11 +24,20 @@ mkdir -p $DESTDIR
 # brew install erlang spidermonkey icu4c md5sha1sum
 # brew link -f icu4c
 
+
+PREFIX=/usr/local
+
+IS_ARM=`uname -a | grep arm64`
+
+if [ -n "$IS_ARM" ]; then
+  PREFIX=/opt/homebrew
+fi
+
 # get latest couchdb release:
 rm -rf apache-couchdb-*
 sleep 4
 
-URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
+URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.3.0/rc.1/apache-couchdb-3.3.0-RC1.tar.gz
 curl -O $URL
 tar xzf apache-couchdb-*
 
@@ -36,18 +47,18 @@ COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | 
 cd apache-couchdb-*
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
-ERLANG_PREFIX=/usr/local/opt/couchdbx-erlang
-ICU_PREFIX=/usr/local/opt/icu4c
+ERLANG_PREFIX=$PREFIX/opt/couchdbx-erlang
+ICU_PREFIX=$PREFIX/opt/icu4c
 
 case $COUCHDB_MAJOR_VERSION in
     3)
   echo "building for 3"
   perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
-  export PATH=$ERLANG_PREFIX=/usr/local/opt/couchdbx-erlang/bin:$PATH
+  export PATH=$ERLANG_PREFIX=$PREFIX/opt/couchdbx-erlang/bin:$PATH
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 86 --erlang-md5
+  ./configure --spidermonkey-version 91 --erlang-md5
   make -j7
   make release
   cp -r rel/couchdb/ $BUILDDIR
@@ -78,11 +89,11 @@ esac
 cd ..
 
 
-# SOURCES="/usr/local/lib \
-#     /usr/local/bin \
-#     /usr/local/etc \
-#     /usr/local/var \
-#     /usr/local/share"
+# SOURCES="$PREFIX/lib \
+#     $PREFIX/bin \
+#     $PREFIX/etc \
+#     $PREFIX/var \
+#     $PREFIX/share"
 #
 # cp -r $SOURCES $BUILDDIR
 
@@ -90,17 +101,17 @@ cd ..
 
 
 ICU_VERSION=`ls $ICU_PREFIX/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
-NSPR_VERSION=`ls /usr/local/Cellar/nspr/`
+NSPR_VERSION=`ls $PREFIX/Cellar/nspr/`
 
 # copy icu & ssl && nspr libs to safety
 cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
    $ICU_PREFIX/lib/libicudata.$ICU_VERSION.dylib \
    $ICU_PREFIX/lib/libicui18n.$ICU_VERSION.dylib \
-   /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib \
-   /usr/local/opt/nspr/lib/libplds4.dylib \
-   /usr/local/opt/nspr/lib/libplc4.dylib \
-   /usr/local/opt/nspr/lib/libnspr4.dylib \
-   /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib \
+   $PREFIX/opt/openssl@1.1/lib/libcrypto.1.1.dylib \
+   $PREFIX/opt/nspr/lib/libplds4.dylib \
+   $PREFIX/opt/nspr/lib/libplc4.dylib \
+   $PREFIX/opt/nspr/lib/libnspr4.dylib \
+   $PREFIX/opt/spidermonkey$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib \
      $BUILDDIR/lib/
 
 
@@ -183,28 +194,28 @@ adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicuuc.$IC
 
 
 # adjust crypto.so
-adjust_name /usr/local/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
+adjust_name $PREFIX/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
 
 # adjust couchjs
-adjust_name /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib lib/libmozjs-86.dylib bin/couchjs
+adjust_name $PREFIX/opt/spidermonkey$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
 
 # adjust libmozjs & deps
-adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-86.dylib
-adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-86.dylib
-adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-86.dylib
-adjust_name /usr/local/opt/spidermonkey86/lib/libmozjs-86.dylib lib/libmozjs-86.dylib lib/libmozjs-86.dylib
-adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-86.dylib
-adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-86.dylib
-adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-86.dylib
+adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/spidermonkey$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 
 
-adjust_name /usr/local/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
-adjust_name /usr/local/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libplds4.dylib
+adjust_name $PREFIX/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
+adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libplds4.dylib
 
-adjust_name /usr/local/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
-adjust_name /usr/local/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libplc4.dylib
+adjust_name $PREFIX/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplc4.dylib
+adjust_name $PREFIX/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libplc4.dylib
 
-adjust_name /usr/local/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libnspr4.dylib
+adjust_name $PREFIX/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libnspr4.dylib
 
 # trim package, lol
 
