@@ -6,6 +6,16 @@ if [ -z "$CODESIGN_IDENTITY" ]; then
   exit 1
 fi
 
+URL=$1
+
+if [ -z "$URL" ]; then
+  echo "No URL found"
+  echo "Usage: ./build.sh URL"
+  echo "Example: ./build.sh https://dist.apache.org/repos/dist/dev/couchdb/source/3.3.0/rc.2/apache-couchdb-3.3.0-RC2.tar.gz"
+  echo "Exiting"
+  exit 2
+fi
+
 SM_VERSION=91
 
 # clean &  create builddir
@@ -37,7 +47,6 @@ fi
 rm -rf apache-couchdb-*
 sleep 4
 
-URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.3.0/rc.1/apache-couchdb-3.3.0-RC1.tar.gz
 curl -O $URL
 tar xzf apache-couchdb-*
 
