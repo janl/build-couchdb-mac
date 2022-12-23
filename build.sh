@@ -293,8 +293,9 @@ TO_PRUNE=" \
   bin/*png* \
   bin/*jpeg* \
 "
+PRUNE_O=`find . -name "*.o"`
 
-rm -rf $TO_PRUNE
+rm -rf $TO_PRUNE $PRUNE_O
 
 
 # build mac app
