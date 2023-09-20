@@ -29,6 +29,14 @@ DESTDIR=./build
 rm -rf $DESTDIR
 mkdir -p $DESTDIR
 
+PREFIX=$PREFIX
+
+IS_ARM=`uname -a | grep arm`
+
+if [ -n "$IS_ARM" ]; then
+    PREFIX=/opt/homebrew
+fi
+
 # prepare build deps
 # brew update
 # brew install erlang spidermonkey icu4c md5sha1sum
@@ -45,15 +53,26 @@ fi
 
 # get latest couchdb release:
 rm -rf apache-couchdb-*
-sleep 4
+# sleep 4
 
-curl -O $URL
+#URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
+# curl -O $1
+
+cp ../apache-couchdb-3.3.2.tar.gz ./
 tar xzf apache-couchdb-*
 
 COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
 
 # build couchdb
 cd apache-couchdb-*
+# rm -rf bin/rebar* 
+
+# temp add erlang 26 support
+
+perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' rebar.config.script
+perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' src/snappy/rebar.config
+# perl -pi.bak -e 's/\{incl_cond,\ exclude\},//' rel/reltool.config
+perl -pi.bak -e 's/\{excl_archive_filters, \["\.\*"\]\},//' rel/reltool.config
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
 ERLANG_PREFIX=$PREFIX/opt/couchdbx-erlang
@@ -69,6 +88,7 @@ case $COUCHDB_MAJOR_VERSION in
   export CPPFLAGS="-I$ICU_PREFIX/include"
   ./configure --spidermonkey-version 91 --erlang-md5
   make -j7
+  ls bin/
   make release
   cp -r rel/couchdb/ $BUILDDIR
   break
@@ -108,7 +128,6 @@ cd ..
 
 
 
-
 ICU_VERSION=`ls $ICU_PREFIX/lib/libicuuc.??.?.dylib | grep -o '\d\d\.\d'`
 NSPR_VERSION=`ls $PREFIX/Cellar/nspr/`
 
@@ -121,7 +140,7 @@ cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
    $PREFIX/opt/nspr/lib/libplc4.dylib \
    $PREFIX/opt/nspr/lib/libnspr4.dylib \
    $PREFIX/lib/libmozjs-$SM_VERSION.dylib \
-     $BUILDDIR/lib/
+   $BUILDDIR/lib/
 
 
 # replace PATHs
@@ -216,7 +235,6 @@ adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs
 adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
-
 
 adjust_name $PREFIX/Cellar/nspr/$NSPR_VERSION/lib/libnspr4.dylib lib/libnspr4.dylib lib/libplds4.dylib
 adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libplds4.dylib
