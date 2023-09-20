@@ -56,9 +56,9 @@ rm -rf apache-couchdb-*
 # sleep 4
 
 #URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
-# curl -O $1
+url -O $URL
+# cp ../apache-couchdb-3.3.2.tar.gz ./
 
-cp ../apache-couchdb-3.3.2.tar.gz ./
 tar xzf apache-couchdb-*
 
 COUCHDB_VERSION=`ls apache-couchdb-* | head -n 1 | grep -Eo '(\d+\.\d+\.\d+)' | head -1`
