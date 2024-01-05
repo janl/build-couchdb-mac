@@ -224,13 +224,13 @@ adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicuuc.$IC
 adjust_name $PREFIX/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
 
 # adjust couchjs
-adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
+adjust_name $PREFIX/opt/spidermonkey@91/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
 
 # adjust libmozjs & deps
 adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-$SM_VERSION.dylib
-adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/spidermonkey@91/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 
 adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
