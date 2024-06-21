@@ -1,11 +1,22 @@
 #!/bin/sh -x
 
-
 if [ -z "$CODESIGN_IDENTITY" ]; then
   echo "No CODESIGN_IDENTITY found. Exiting."
   exit 1
 fi
 
+## assert build env
+# erlang  25
+ERLANG_VERSION=`erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell \
+                | sed -e "s/$'*//" \
+                | sed -e "s/\"//g" \
+                | sed -e "s/\r//"`
+if [ "$ERLANG_VERSION" != "25" ]; then
+  echo "Wrong Erlang version installed. Expected: 25, found '$ERLANG_VERSION'"
+  exit 3
+fi
+
+ 
 URL=$1
 
 if [ -z "$URL" ]; then
@@ -69,8 +80,8 @@ cd apache-couchdb-*
 
 # temp add erlang 26 support
 
-perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' rebar.config.script
-perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' src/snappy/rebar.config
+# perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' rebar.config.script
+# perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' src/snappy/rebar.config
 # perl -pi.bak -e 's/\{incl_cond,\ exclude\},//' rel/reltool.config
 perl -pi.bak -e 's/\{excl_archive_filters, \["\.\*"\]\},//' rel/reltool.config
 
@@ -86,7 +97,7 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 91 --erlang-md5
+  ./configure --spidermonkey-version 91 --erlang-md5 --enable-nouveau
   make -j7
   ls bin/
   make release
@@ -94,25 +105,25 @@ case $COUCHDB_MAJOR_VERSION in
   break
     ;;
     2)
-	echo "building for 2"
-	perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
-	./configure
-	make
-	make release
-	cp -r rel/couchdb/ $BUILDDIR
-	break
+  echo "building for 2"
+  perl -pi.bak -e 's,\-name\ couchdb\@127\.0\.0\.1,\-name\ couchdb\@localhost,' ./configure # fixme later
+  ./configure
+  make
+  make release
+  cp -r rel/couchdb/ $BUILDDIR
+  break
     ;;
     1)
-	echo "building for 1"
-	./configure --prefix=$BUILDDIR
-	make -j5
-	make install
-	break
+  echo "building for 1"
+  ./configure --prefix=$BUILDDIR
+  make -j5
+  make install
+  break
     ;;
 
     *)
-	echo "unknown CouchDB Version $COUCHDB_VERSION"
-	exit 7
+  echo "unknown CouchDB Version $COUCHDB_VERSION"
+  exit 7
 esac
 
 cd ..
@@ -135,7 +146,7 @@ NSPR_VERSION=`ls $PREFIX/Cellar/nspr/`
 cp $ICU_PREFIX/lib/libicuuc.$ICU_VERSION.dylib \
    $ICU_PREFIX/lib/libicudata.$ICU_VERSION.dylib \
    $ICU_PREFIX/lib/libicui18n.$ICU_VERSION.dylib \
-   $PREFIX/opt/openssl@1.1/lib/libcrypto.1.1.dylib \
+   $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib \
    $PREFIX/opt/nspr/lib/libplds4.dylib \
    $PREFIX/opt/nspr/lib/libplc4.dylib \
    $PREFIX/opt/nspr/lib/libnspr4.dylib \
@@ -183,30 +194,30 @@ adjust_name_by_tag() {
 case $COUCHDB_MAJOR_VERSION in
     [23])
         echo "adjusting for 2/3"
-	# adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	# adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-	# adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
-
-	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-
-
-        # adjust couch_ejson_compare linking
-	adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
-	break
+        # adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+        # adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+        # adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_icu_driver.so
+      
+        adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+      
+      
+              # adjust couch_ejson_compare linking
+        adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+        adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+        adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/couch-*/priv/couch_ejson_compare.so
+        break
     ;;
     1)
         echo "adjusting for 1"
-	adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
-	adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
-	adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
-
-        # adjust couch_ejson_compare linking
-	adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
-	adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
-	adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
-	break
+        adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+        adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+        adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_icu_driver.so
+      
+              # adjust couch_ejson_compare linking
+        adjust_name $ICU_PREFIX/lib/libicudata.$ICUDATA_VERSION.dylib lib/libicudata.$ICUDATA_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+        adjust_name $ICU_PREFIX/lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/libicuuc.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+        adjust_name $ICU_PREFIX/lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/libicui18n.$ICUUCI18N_VERSION.dylib lib/couchdb/erlang/lib/couch-*/priv/lib/couch_ejson_compare.so
+        break
     ;;
 
     *)
@@ -221,7 +232,8 @@ adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libicui18n.$ICU_
 adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libicuuc.$ICU_VERSION.dylib
 
 # adjust crypto.so
-adjust_name $PREFIX/opt/openssl@1.1/lib/libcrypto.1.1.dylib lib/libcrypto.1.1.dylib lib/crypto-*/priv/lib/crypto.so
+adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib lib/crypto-*/priv/lib/crypto.so
+adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib lib/crypto-*/priv/lib/otp_test_engine.so
 
 # adjust couchjs
 adjust_name $PREFIX/opt/spidermonkey@91/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
@@ -312,27 +324,37 @@ TO_PRUNE=" \
   bin/*jpeg* \
 "
 PRUNE_O=`find . -name "*.o"`
-
 rm -rf $TO_PRUNE $PRUNE_O
 
 
-# build mac app
-cd -
-git clone git@github.com:janl/couchdb-mac-app.git couchdb-mac-app
-cd -
 SIGN_BIN=`find . -type f -perm +111 -print`
 SIGN_SO=`find . -name "*.so"`
 SIGN_DYLIB=`find . -name "*.dylib"`
+
+# linking check
+INT_WRONGLINK=$(for file in $SIGN_BIN $SIGN_SO $SIGN_DYLIB ; do B=`basename $file | sed -e 's/\..*$//'`; otool -L $file | grep -v $B ; done) 
+WRONGLINK=`echo $INT_WRONGLINK | grep homebrew`
+
+if [ -n "$WRONGLINK" ]; then
+  echo "Linking Error, hombrew link detected"
+  for file in $SIGN_BIN $SIGN_SO $SIGN_DYLIB ; do otool -L $file; done
+  exit 8
+else
+  echo "no linking errors yay"
+fi
+
 codesign --verbose --force --deep -o runtime --sign $CODESIGN_IDENTITY \
   --entitlements $ENT_PATH/entitlements.plist \
     $SIGN_BIN $SIGN_SO $SIGN_DYLIB
 cd -
+
+git clone git@github.com:janl/couchdb-mac-app.git couchdb-mac-app
 cd couchdb-mac-app
   perl -pi.bak -e "s/\<string\>VERSION\<\/string\>/<string>$COUCHDB_VERSION<\/string>/" CouchDB\ Server/Apache\ CouchDB-Info.plist
   open Apache\ CouchDB.xcodeproj
   # xcodebuild clean
   # xcodebuild archive
-  cd build/Release
+  # cd build/Release
   # zip Apache\ CouchDB.app.zip Apache\ CouchDB.app
   # UPLOAD=`xcrun altool --notarize-app -t osx -f Apache\ CouchDB.app.zip \
   #   --primary-bundle-id org.apache.couchdbx-jan \
@@ -342,7 +364,7 @@ cd couchdb-mac-app
   #
   # echo $UPLOAD
 
-  cd ../..
+  # cd ../..
   # CDBX_BASE_DIR=`pwd`
   # CDBX_BUILD_DIR=$CDBX_BASE_DIR/Builds
   # CDBX_ARCHIVE=$CDBX_BASE_DIR/Apache\ CouchDB.xcarchive
@@ -359,11 +381,12 @@ cd couchdb-mac-app
   echo "Done"
 cd ..
 
-cp couchdb-mac-app/build/Release/Apache-*.zip $DESTDIR
 
-cd $DESTDIR
-ZIPFILE=`ls Apache-*.zip`
-shasum -a 256 Apache-*.zip > $ZIPFILE.sha256
-shasum -a 512 Apache-*.zip > $ZIPFILE.sha512
+# cp couchdb-mac-app/build/Release/Apache-*.zip $DESTDIR
 
-echo "now run gpg --armor --detach-sig $DESTDIR/$ZIPFILE > $DESTDIR/$ZIPFILE.asc"
+# cd $DESTDIR
+# ZIPFILE=`ls Apache-*.zip`
+# shasum -a 256 Apache-*.zip > $ZIPFILE.sha256
+# shasum -a 512 Apache-*.zip > $ZIPFILE.sha512
+
+# echo "now run gpg --armor --detach-sig $DESTDIR/$ZIPFILE > $DESTDIR/$ZIPFILE.asc"
