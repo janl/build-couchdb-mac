@@ -68,7 +68,7 @@ rm -rf apache-couchdb-*
 
 #URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
 curl -O $URL
-# cp ../apache-couchdb-3.3.2.tar.gz ./
+# cp ../apache-couchdb-3.4.0-RC3.tar.gz ./
 
 tar xzf apache-couchdb-*
 
@@ -97,7 +97,7 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 91 --erlang-md5 --enable-nouveau
+  ./configure --spidermonkey-version 91 --erlang-md5 --with-nouveau --js-engine=quickjs
   make -j7
   ls bin/
   make release
