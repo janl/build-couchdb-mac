@@ -84,6 +84,7 @@ cd apache-couchdb-*
 # perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' src/snappy/rebar.config
 # perl -pi.bak -e 's/\{incl_cond,\ exclude\},//' rel/reltool.config
 perl -pi.bak -e 's/\{excl_archive_filters, \["\.\*"\]\},//' rel/reltool.config
+perl -pi.bak -e 's/gradle-8.8/gradle-8.10/' nouveau/gradle/wrapper/gradle-wrapper.properties
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
 ERLANG_PREFIX=$PREFIX/opt/couchdbx-erlang
@@ -97,8 +98,8 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 91 --erlang-md5 --with-nouveau --js-engine=quickjs
-  make -j7
+  ./configure --spidermonkey-version 91 --erlang-md5 --with-nouveau
+  make -j12
   ls bin/
   make release
   cp -r rel/couchdb/ $BUILDDIR
