@@ -27,7 +27,7 @@ if [ -z "$URL" ]; then
   exit 2
 fi
 
-SM_VERSION=91
+SM_VERSION=128
 
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
@@ -98,7 +98,7 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version 91 --erlang-md5 --with-nouveau
+  ./configure --spidermonkey-version $SM_VERSION --erlang-md5 --with-nouveau
   make -j12
   ls bin/
   make release
@@ -237,15 +237,16 @@ adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib li
 adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib lib/crypto-*/priv/lib/otp_test_engine.so
 
 # adjust couchjs
-adjust_name $PREFIX/opt/spidermonkey@91/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
+adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
 
 # adjust libmozjs & deps
 adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-$SM_VERSION.dylib
-adjust_name $PREFIX/opt/spidermonkey@91/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 
-adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+
+# adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name_by_tag libicuuc lib/libicuuc.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name_by_tag libicui18n lib/libicui18n.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 
