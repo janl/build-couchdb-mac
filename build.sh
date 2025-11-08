@@ -11,8 +11,8 @@ ERLANG_VERSION=`erl -eval 'erlang:display(erlang:system_info(otp_release)), halt
                 | sed -e "s/$'*//" \
                 | sed -e "s/\"//g" \
                 | sed -e "s/\r//"`
-if [ "$ERLANG_VERSION" != "25" ]; then
-  echo "Wrong Erlang version installed. Expected: 25, found '$ERLANG_VERSION'"
+if [ "$ERLANG_VERSION" != "26" ]; then
+  echo "Wrong Erlang version installed. Expected: 26, found '$ERLANG_VERSION'"
   exit 3
 fi
 
@@ -99,7 +99,7 @@ case $COUCHDB_MAJOR_VERSION in
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
   ./configure --spidermonkey-version $SM_VERSION --erlang-md5 --with-nouveau
-  make -j12
+  make -j15
   ls bin/
   make release
   cp -r rel/couchdb/ $BUILDDIR
