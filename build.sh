@@ -19,15 +19,15 @@ fi
  
 URL=$1
 
-if [ -z "$URL" ]; then
-  echo "No URL found"
-  echo "Usage: ./build.sh URL"
-  echo "Example: ./build.sh https://dist.apache.org/repos/dist/dev/couchdb/source/3.3.0/rc.2/apache-couchdb-3.3.0-RC2.tar.gz"
-  echo "Exiting"
-  exit 2
-fi
+#if [ -z "$URL" ]; then
+#  echo "No URL found"
+#  echo "Usage: ./build.sh URL"
+#  echo "Example: ./build.sh https://dist.apache.org/repos/dist/dev/couchdb/source/3.3.0/rc.2/apache-couchdb-3.3.0-RC2.tar.gz"
+#  echo "Exiting"
+#  exit 2
+#fi
 
-SM_VERSION=128
+SM_VERSION=115
 
 # clean &  create builddir
 BUILDDIR=/tmp/couchdbx-core
@@ -39,14 +39,6 @@ ENT_PATH=`pwd`
 DESTDIR=./build
 rm -rf $DESTDIR
 mkdir -p $DESTDIR
-
-PREFIX=$PREFIX
-
-IS_ARM=`uname -a | grep arm`
-
-if [ -n "$IS_ARM" ]; then
-    PREFIX=/opt/homebrew
-fi
 
 # prepare build deps
 # brew update
@@ -68,7 +60,7 @@ rm -rf apache-couchdb-*
 
 #URL=https://dist.apache.org/repos/dist/dev/couchdb/source/3.2.1/rc.1/apache-couchdb-3.2.1-RC1.tar.gz
 curl -O $URL
-# cp ../apache-couchdb-3.4.0-RC3.tar.gz ./
+# cp ../apache-couchdb-3.5.1-RC1.tar.gz ./
 
 tar xzf apache-couchdb-*
 
@@ -84,7 +76,8 @@ cd apache-couchdb-*
 # perl -pi.bak -e 's/23\|24\|25/23\|24\|25\|26/' src/snappy/rebar.config
 # perl -pi.bak -e 's/\{incl_cond,\ exclude\},//' rel/reltool.config
 perl -pi.bak -e 's/\{excl_archive_filters, \["\.\*"\]\},//' rel/reltool.config
-perl -pi.bak -e 's/gradle-8.8/gradle-8.10/' nouveau/gradle/wrapper/gradle-wrapper.properties
+perl -pi.bak -e 's/gradle-8.10/gradle-9.2.0/' nouveau/gradle/wrapper/gradle-wrapper.properties
+perl -pi.bak -e 's/6.25.0/8.0.0/' nouveau/build.gradle
 
 COUCHDB_MAJOR_VERSION=`echo $COUCHDB_VERSION | cut -b 1`
 ERLANG_PREFIX=$PREFIX/opt/couchdbx-erlang
@@ -98,7 +91,7 @@ case $COUCHDB_MAJOR_VERSION in
   export LDFLAGS="-L$ICU_PREFIX/lib"
   export CFLAGS="-I$ICU_PREFIX/include"
   export CPPFLAGS="-I$ICU_PREFIX/include"
-  ./configure --spidermonkey-version $SM_VERSION --erlang-md5 --with-nouveau
+  ./configure --spidermonkey-version $SM_VERSION --with-nouveau
   make -j15
   ls bin/
   make release
@@ -237,13 +230,13 @@ adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib li
 adjust_name $PREFIX/opt/openssl@3/lib/libcrypto.3.dylib lib/libcrypto.3.dylib lib/crypto-*/priv/lib/otp_test_engine.so
 
 # adjust couchjs
-adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
+adjust_name $PREFIX/opt/spidermonkey@$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib bin/couchjs
 
 # adjust libmozjs & deps
 adjust_name $PREFIX/opt/nspr/lib/libplds4.dylib lib/libplds4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libplc4.dylib lib/libplc4.dylib lib/libmozjs-$SM_VERSION.dylib
 adjust_name $PREFIX/opt/nspr/lib/libnspr4.dylib lib/libnspr4.dylib lib/libmozjs-$SM_VERSION.dylib
-adjust_name $PREFIX/opt/spidermonkey/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
+adjust_name $PREFIX/opt/spidermonkey@$SM_VERSION/lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
 
 
 # adjust_name_by_tag libicudata lib/libicudata.$ICU_VERSION.dylib lib/libmozjs-$SM_VERSION.dylib
@@ -345,7 +338,7 @@ else
   echo "no linking errors yay"
 fi
 
-codesign --verbose --force --deep -o runtime --sign $CODESIGN_IDENTITY \
+codesign --verbose --force --deep -o runtime --preserve-metadata=entitlements,requirements,flags,runtime --sign $CODESIGN_IDENTITY \
   --entitlements $ENT_PATH/entitlements.plist \
     $SIGN_BIN $SIGN_SO $SIGN_DYLIB
 cd -
